@@ -1,0 +1,71 @@
+# --- Python Base ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+alembic/
+alembic*
+fastapi_analysis_and_docs.md
+tests/
+docs/
+clinic.db*
+# --- Virtual Environments ---
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# --- FastAPI / App Specific ---
+# Secret keys and environment variables
+.env
+.env.*
+!.env.example
+*.env
+
+# SQLite local databases (commonly used for local FastAPI development)
+*.db
+*.sqlite3
+
+# Log files
+*.log
+logs/
+
+# --- Testing & Coverage ---
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# --- IDEs & Editors ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
