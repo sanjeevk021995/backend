@@ -73,3 +73,8 @@ def root():
         "docs": "/docs",
         "setup": "/api/v1/setup/status",
     }
+
+
+@app.route("/", methods=["GET", "HEAD"])
+def read_root():
+    return {"status": "connected to backend"}
