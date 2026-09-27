@@ -6,9 +6,9 @@ from app.models.audit import AuditLog
 
 def audit(
     db: Session,
-    action: str,
     user_id: Optional[str] = None,
     clinic_id: Optional[str] = None,
+    action: str = "",
     entity_type: Optional[str] = None,
     entity_id: Optional[str] = None,
     details: Optional[Dict[str, Any]] = None,

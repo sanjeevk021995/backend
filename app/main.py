@@ -13,9 +13,9 @@ from app.core.logging import setup_logging, setup_db_logging, register_logging_a
 setup_logging(debug=False)
 setup_db_logging(engine, slow_query_threshold_ms=300.0)
 
-# Development convenience: create tables automatically when running with SQLite.
+# Development convenience: create tables automatically when running with SQLite or PostgreSQL.
 # Production should use Alembic migrations and PostgreSQL.
-if settings.database_url.startswith("sqlite"):
+if settings.sync_database_url.startswith(("sqlite", "postgresql")):
     Base.metadata.create_all(bind=engine)
 
 # Base.metadata.create_all(bind=engine)

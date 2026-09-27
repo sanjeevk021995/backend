@@ -167,6 +167,7 @@
 #         "message": "Patient deactivated"
 #     }
 
+import re
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import or_, func
 from sqlalchemy.orm import Session
@@ -218,6 +219,39 @@ def list_patients(
     return query.order_by(Patient.full_name).all()
 
 
+# @router.post("/", response_model=PatientResponse, status_code=201)
+# def create_patient(
+#     clinic_id: str,
+#     payload: PatientCreate,
+#     user=Depends(current_user),
+#     db: Session = Depends(get_db),
+# ):
+#     access(db, user, clinic_id)
+
+#     # 1. Retrieve clinic and extract short_name (fallback to first 4 letters of name or 'PAT')
+#     clinic = db.get(Clinic, clinic_id)
+#     raw_prefix = clinic.short_name if (clinic and clinic.short_name) else (clinic.name[:4] if clinic else "PAT")
+#     prefix = raw_prefix.upper().strip()
+
+#     # 2. Sequential unique Patient Number (e.g., CLINIC-00001)
+#     total_count = db.query(Patient).filter(Patient.clinic_id == clinic_id).count()
+#     patient_number = f"{prefix}-{total_count + 1:05d}"
+
+#     row = Patient(
+#         clinic_id=clinic_id,
+#         patient_number=patient_number,
+#         **payload.model_dump(),
+#     )
+
+#     db.add(row)
+#     db.flush()
+
+#     audit(db, user.id, clinic_id, "patient.created", "Patient", row.id)
+#     db.commit()
+#     db.refresh(row)
+
+#     return row
+
 @router.post("/", response_model=PatientResponse, status_code=201)
 def create_patient(
     clinic_id: str,
@@ -227,15 +261,31 @@ def create_patient(
 ):
     access(db, user, clinic_id)
 
-    # 1. Retrieve clinic and extract short_name (fallback to first 4 letters of name or 'PAT')
+    # 1. Retrieve clinic and extract prefix
     clinic = db.get(Clinic, clinic_id)
     raw_prefix = clinic.short_name if (clinic and clinic.short_name) else (clinic.name[:4] if clinic else "PAT")
     prefix = raw_prefix.upper().strip()
 
-    # 2. Sequential unique Patient Number (e.g., CLINIC-00001)
-    total_count = db.query(Patient).filter(Patient.clinic_id == clinic_id).count()
-    patient_number = f"{prefix}-{total_count + 1:05d}"
+    # 2. Fetch all patient numbers matching this prefix across the DB to guarantee absolute uniqueness
+    existing_numbers = (
+        db.query(Patient.patient_number)
+        .filter(Patient.patient_number.ilike(f"{prefix}-%"))
+        .all()
+    )
 
+    # 3. Find the maximum sequence number used so far
+    max_seq = 0
+    for (p_num,) in existing_numbers:
+        if p_num:
+            numbers = re.findall(r"\d+", p_num)
+            if numbers:
+                seq = int(numbers[-1])
+                if seq > max_seq:
+                    max_seq = seq
+
+    patient_number = f"{prefix}-{max_seq + 1:05d}"
+
+    # 4. Instantiate and commit patient record
     row = Patient(
         clinic_id=clinic_id,
         patient_number=patient_number,
@@ -250,7 +300,6 @@ def create_patient(
     db.refresh(row)
 
     return row
-
 
 @router.get("/{patient_id}", response_model=PatientResponse)
 def get_patient(

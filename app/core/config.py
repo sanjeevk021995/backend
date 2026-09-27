@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     app_name: str = "Clinic Management API"
     environment: str = "development"
     debug: bool = True
-    database_url: str = "sqlite:///./clinic.db"
+    database_url: str = "postgresql://localhost/clinic"
     jwt_secret: str = "CHANGE_ME"
     jwt_access_minutes: int = 30
     jwt_refresh_days: int = 7

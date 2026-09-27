@@ -38,8 +38,15 @@ from sqlalchemy.orm import sessionmaker
 from app.core.config import settings
 
 is_sqlite = settings.sync_database_url.startswith("sqlite")
+is_postgresql = settings.sync_database_url.startswith("postgresql")
 
-connect_args = {"check_same_thread": False, "timeout": 30} if is_sqlite else {}
+if is_sqlite:
+    connect_args = {"check_same_thread": False, "timeout": 30}
+elif is_postgresql:
+    # Keep session time zone on UTC so naive UTC datetimes behave exactly as they do on SQLite.
+    connect_args = {"options": "-c TimeZone=UTC"}
+else:
+    connect_args = {}
 
 engine = create_engine(
     settings.sync_database_url,

@@ -37,10 +37,7 @@ venv.bak/
 
 # --- FastAPI / App Specific ---
 # Secret keys and environment variables
-.env
-.env.*
-!.env.example
-*.env
+
 
 # SQLite local databases (commonly used for local FastAPI development)
 *.db
